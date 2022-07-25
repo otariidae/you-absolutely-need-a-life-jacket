@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ライフジャケット自動応答AI</title>
+    <style>
+        body {
+            margin: 1rem auto;
+            padding: 0 1rem;
+            max-width: 1024px;
+        }
+
+        #question {
+            padding: 1em;
+            border-radius: 5px;
+            background-color: #66ffcc;
+            font-size: 1.8rem;
+        }
+
+        #question input {
+            border-style: none;
+            font-size: unset;
+        }
+
+        #query {
+            padding: 0.5em 1em;
+            border-style: none;
+            border-radius: 5px;
+            color: white;
+            background-color: #004095;
+            font-size: 1.5rem;
+        }
+
+        #query:disabled {
+            background-color: grey;
+        }
+
+        #short-answer {
+            padding: 1em;
+            border: 2px solid #00ae7a;
+            border-radius: 5px;
+            font-size: 1.5rem;
+        }
+
+        #short-answer::before {
+            content: "A.";
+            display: inline;
+        }
+
+        #long-answer p {
+            text-indent: 1em;
+            line-height: 1.2;
+        }
+
+        footer {
+            margin-top: 3rem;
+            border-top: 1px solid grey;
+        }
+    </style>
+</head>
+
+<body>
+    <p>自動応答AIがあなたの質問に答えます。</p>
+    <form id="question">
+        Q.
+        <input name="when" required placeholder="例）お盆休み" size="12">に、<input name="who" required placeholder="例）高校の仲間たち" size="15">と川の<input name="where" required placeholder="例）河川敷" size="10">で<input name="what" required placeholder="例）バーベキュー" size="15">する予定です。川で水遊びをする予定はありません。それでも、ライフジャケットは必要ですか？
+    </form>
+    <p>
+        <button form="question" id="query">回答</button>
+    </p>
+    <p id="loading" hidden>AIが回答を考えています...</p>
+    <div id="answer" hidden>
+        <p id="short-answer">
+            <strong id="short-answer-text"></strong>
+        </p>
+        <div id="long-answer"></div>
+    </div>
+
+    <footer hidden>
+        <p>このAIは次のWebサイト・アプリにインスパイアされました。</p>
+        <ul>
+            <li><a href="https://www.pref.gifu.lg.jp/page/27330.html">水難事故等に関するQ&A（よくある質問） - 岐阜県公式ホームページ（河川課）</a></li>
+            <li><a href="https://hutinoatari.github.io/cheapTransfer/">最安経路検索</a></li>
+        </ul>
+    </footer>
+
+    <script>
+        const form = document.getElementById("question")
+        const query = document.getElementById("query")
+        const loading = document.getElementById("loading")
+        const answerArea = document.getElementById("answer")
+        const shortAnswerText = document.getElementById("short-answer-text")
+        const longAnswer = document.getElementById("long-answer")
+        const footer = document.querySelector("footer")
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault()
+            query.disabled = true
+            loading.hidden = false
+            answerArea.hidden = true
+            footer.hidden = true
+            const when = form.elements.when.value
+            const who = form.elements.who.value
+            const where = form.elements.where.value
+            const what = form.elements.what.value
+            const clearId = setInterval(() => {
+                loading.textContent += "."
+            }, 250)
+            const answer = await generateAnswer(when, who, where, what)
+            clearInterval(clearId)
+            shortAnswerText.textContent = answer.short
+            const longAnswerParagraphs = answer.long.map(text => {
+                const p = document.createElement("p")
+                p.textContent = text
+                return p
+            })
+            longAnswer.append(...longAnswerParagraphs)
+            query.disabled = false
+            loading.hidden = true
+            answerArea.hidden = false
+            footer.hidden = false
+        })
+        async function generateAnswer(when, who, where, what) {
+            await sleep(randint(2000, 5000))
+            return {
+                short: `ライフジャケットが絶対に必要です。川を甘く見ると重大な事故につながります。楽しかったはずの${who}との${what}が最悪の結果となります。`,
+                long: [
+                    `川で水遊びをする予定がなくても、${who}は「川に入ってみたい」と言い出すかもしれません。そこで「少しくらいなら大丈夫だろう」と川を甘く見ると重大な事故につながります。`,
+                    "川で水遊びをする場合は、全員分のライフジャケットを購入して川での水遊びに備えてください。そして、川に入る際には、足首の深さまで入るだけのつもりでも、ライフジャケットを必ず着用してください。",
+                    `川底は藻でヌルヌルしていることがあり、${who}が滑って転んで川に流されてしまうかもしれません。また、川底に流木や岩の割れ目などがあることもあり、${who}がそれらにつまづいて転んで川に流されてしまうかもしれません。転ばなくても、${who}のサンダルが脱げて流され、そのサンダルを追いかけて${who}が川に流されてしまうかもしれません。そのようなとき、${who}がライフジャケットを着用していないと、溺死する可能性が高くなります。`,
+                    `また、流される${who}を見て、あなたも助けようと川に飛び込むかもしれません。そのとき、あなたもライフジャケットを着用していないと、溺死する可能性が高くなります。このような状況で助かる可能性は非常に低いと言わざるを得ません。`,
+                    `楽しかったはずの${who}との${what}が最悪の結果となります。`,
+                    "川を甘く見てライフジャケットを着用しないと、このようになる可能性があるのです。逆に、ライフジャケットを着用していれば、助かる可能性は高くなります。川に少しでも入るときはライフジャケットを必ず着用してください。",
+                    `なお、ライフジャケットは、水難事故防止だけでなく、洪水時における避難等の際に救命胴衣としても役に立ちますので、${where}での${what}をきっかけにライフジャケットを購入することは一石二鳥と言えます。`
+                ]
+            }
+        }
+        const randint = (min, max) => Math.random() * (max - min) + min
+        const sleep = n => new Promise(resolve => setTimeout(resolve, n))
+    </script>
+</body>
+
+</html>
