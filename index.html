@@ -115,7 +115,7 @@
                 p.textContent = text
                 return p
             })
-            longAnswer.append(...longAnswerParagraphs)
+            longAnswer.replaceChildren(...longAnswerParagraphs)
             query.disabled = false
             loading.hidden = true
             answerArea.hidden = false
